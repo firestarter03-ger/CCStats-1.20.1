@@ -3,7 +3,7 @@
 	"package": "net.firestarter03.ccstats.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+		"ScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

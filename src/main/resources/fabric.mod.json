@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "ccstats",
-	"version": "${version}",
+	"version": "1.0.0",
 	"name": "CCStats",
 	"description": "Diese Mod liest die Rüstungs Modifier aus und Rechnet diese zusammen!",
 	"authors": [
@@ -16,21 +16,15 @@
 		],
 		"client": [
 			"net.firestarter03.ccstats.CCStatsClient"
-		],
-		"fabric-datagen": [
-			"net.firestarter03.ccstats.CCStatsDataGenerator"
 		]
 	},
 	"mixins": [
-		"ccstats.mixins.json"
-	],
+			"ccstats.mixins.json"
+		],
 	"depends": {
 		"fabricloader": ">=0.16.5",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }

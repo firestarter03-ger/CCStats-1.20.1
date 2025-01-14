@@ -6,12 +6,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.text.Text;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 
 public class CCStatsClient implements ClientModInitializer {
     private static LoreProcessor processor;
 
     @Override
     public void onInitializeClient() {
+        HudRenderCallback.EVENT.register(new CustomHudOverlay());
         // Registriere den ClientTickEvent, um regelmäßig den aktiven Bildschirm zu überprüfen
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             Screen currentScreen = MinecraftClient.getInstance().currentScreen;
