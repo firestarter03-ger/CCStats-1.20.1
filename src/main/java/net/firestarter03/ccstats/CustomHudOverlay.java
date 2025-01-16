@@ -11,9 +11,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +54,7 @@ public class CustomHudOverlay implements HudRenderCallback {
                 int armorYOffset = (int) (screenHeight * 0.15); // Höhe für Rüstungswert
                 int armorTextColor = 0x00e5ff; // Cyan Text für Rüstung
 
-                // Bilder für linkes und rechtes Overlay
+                // Bilder für Overlays
                 context.drawTexture(IMAGE_LEFT, xLeft, yOverlay, 0, 0, overlayWidth, overlayHeight, overlayWidth, overlayHeight);
                 context.drawTexture(IMAGE_RIGHT, xRight, yOverlay, 0, 0, overlayWidth, overlayHeight, overlayWidth, overlayHeight);
 
@@ -100,20 +98,42 @@ public class CustomHudOverlay implements HudRenderCallback {
                     }
                 }
 
+                // Sortierte Listen für die Anzeige
+                List<Map.Entry<String, Double>> sortedPercentages = new ArrayList<>(percentages.entrySet());
+                sortedPercentages.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+                List<Map.Entry<String, Double>> sortedAbsolutes = new ArrayList<>(absolutes.entrySet());
+                sortedAbsolutes.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+
+                // Schriftgröße dynamisch anpassen
+                int availableHeight = overlayHeight - 22; // 22 Pixel Abstand zur Overlay-Oberkante
+                int totalLines = Math.max(sortedPercentages.size(), sortedAbsolutes.size());
+                int fontSize = 12; // Standard-Schriftgröße
+
+                if (totalLines > 0) {
+                    fontSize = Math.max(6, availableHeight / totalLines - 3); // Dynamische Schriftgröße
+                }
+
                 // Linkes Overlay: Prozentwerte
-                int yOffsetLeft = yOverlay + 22;
-                for (Map.Entry<String, Double> entry : percentages.entrySet()) {
+                int yOffsetLeft = yOverlay + 22; // 22 Pixel Abstand zur Overlay-Oberkante
+                for (Map.Entry<String, Double> entry : sortedPercentages) {
                     String statText = String.format("%.2f%% %s", entry.getValue(), entry.getKey());
-                    context.drawText(client.textRenderer, statText, xLeft + 8, yOffsetLeft, 0xFFFFFF, false);
-                    yOffsetLeft += 15;
+                    context.getMatrices().push();
+                    context.getMatrices().scale(fontSize / 12.0f, fontSize / 12.0f, 1.0f);
+                    context.drawText(client.textRenderer, statText, (int) ((xLeft + 8) / (fontSize / 12.0)), (int) (yOffsetLeft / (fontSize / 12.0)), 0xFFFFFF, false);
+                    context.getMatrices().pop();
+                    yOffsetLeft += fontSize + 3; // Dynamischer Zeilenabstand
                 }
 
                 // Rechtes Overlay: Absolute Werte
-                int yOffsetRight = yOverlay + 22;
-                for (Map.Entry<String, Double> entry : absolutes.entrySet()) {
+                int yOffsetRight = yOverlay + 22; // 22 Pixel Abstand zur Overlay-Oberkante
+                for (Map.Entry<String, Double> entry : sortedAbsolutes) {
                     String statText = String.format("+%.0f %s", entry.getValue(), entry.getKey());
-                    context.drawText(client.textRenderer, statText, xRight + 8, yOffsetRight, 0xFFFFFF, false);
-                    yOffsetRight += 15;
+                    context.getMatrices().push();
+                    context.getMatrices().scale(fontSize / 12.0f, fontSize / 12.0f, 1.0f);
+                    context.drawText(client.textRenderer, statText, (int) ((xRight + 8) / (fontSize / 12.0)), (int) (yOffsetRight / (fontSize / 12.0)), 0xFFFFFF, false);
+                    context.getMatrices().pop();
+                    yOffsetRight += fontSize + 3; // Dynamischer Zeilenabstand
                 }
 
                 // Einzelner Rüstungswert anzeigen
@@ -126,4 +146,3 @@ public class CustomHudOverlay implements HudRenderCallback {
         }
     }
 }
-

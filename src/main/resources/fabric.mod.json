@@ -1,13 +1,13 @@
 {
 	"schemaVersion": 1,
 	"id": "ccstats",
-	"version": "1.0.0",
-	"name": "CCStats",
+	"version": "0.0.1",
+	"name": "CCLive ArmorStats",
 	"description": "Diese Mod liest die Rüstungs Modifier aus und Rechnet diese zusammen!",
 	"authors": [
 		"firestarter03"
 	],
-	"license": "CC0-1.0",
+	"license": "CC BY-NC-SA 4.0",
 	"icon": "assets/ccstats/icon.png",
 	"environment": "*",
 	"entrypoints": {
