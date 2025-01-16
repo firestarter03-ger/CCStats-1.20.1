@@ -1,12 +1,17 @@
 {
 	"schemaVersion": 1,
 	"id": "ccstats",
-	"version": "0.0.1",
-	"name": "CCLive ArmorStats",
-	"description": "Diese Mod liest die Rüstungs Modifier aus und Rechnet diese zusammen!",
+	"version": "0.0.2",
+	"name": "CC-Live ArmorStats",
+	"description": "Lass dir Rüstungs Stats im CactusClicker Modus auf PlayLegend anzeigen!",
 	"authors": [
 		"firestarter03"
 	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/cclive-armorstats",
+		"sources": "https://github.com/firestarter03-ger/CCStats-1.20.1"
+
+	},
 	"license": "CC BY-NC-SA 4.0",
 	"icon": "assets/ccstats/icon.png",
 	"environment": "*",
@@ -26,5 +31,20 @@
 		"minecraft": "~1.20.1",
 		"java": ">=17",
 		"fabric-api": "*"
+	},
+	"recommends": {
+		"modmenu": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"custom": {
+		"modmenu":
+		{
+			"links":
+			{
+				"modmenu.twitch": "twitch.tv/firestarter03"
+			}
 	}
+}
 }
