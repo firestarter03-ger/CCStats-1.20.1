@@ -98,6 +98,13 @@ public class CustomHudOverlay implements HudRenderCallback {
                     }
                 }
 
+                int maxFontSize = 12; // Maximale Schriftgröße
+                int minFontSize = 2;  // Minimale Schriftgröße
+                int availableHeight = overlayHeight - 22; // Höhe des Overlays abzüglich der Oberkante
+                int overlayPadding = 9; //Abstand vom Rand des Overlays
+                int maxOverlayTextWidth = overlayWidth - (2 * overlayPadding); // Maximale Breite des Textes im Overlay
+
+
                 // Sortierte Listen für die Anzeige
                 List<Map.Entry<String, Double>> sortedPercentages = new ArrayList<>(percentages.entrySet());
                 sortedPercentages.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
@@ -105,36 +112,91 @@ public class CustomHudOverlay implements HudRenderCallback {
                 List<Map.Entry<String, Double>> sortedAbsolutes = new ArrayList<>(absolutes.entrySet());
                 sortedAbsolutes.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
 
-                // Schriftgröße dynamisch anpassen
-                int availableHeight = overlayHeight - 22; // 22 Pixel Abstand zur Overlay-Oberkante
-                int totalLines = Math.max(sortedPercentages.size(), sortedAbsolutes.size());
-                int fontSize = 12; // Standard-Schriftgröße
+                int fontSizePercent = maxFontSize;
+                int totalLinesPercent = sortedPercentages.size();
 
-                if (totalLines > 0) {
-                    fontSize = Math.max(6, availableHeight / totalLines - 3); // Dynamische Schriftgröße
-                }
-
-                // Linkes Overlay: Prozentwerte
-                int yOffsetLeft = yOverlay + 22; // 22 Pixel Abstand zur Overlay-Oberkante
+                // Berechnung für linkes Overlay (Prozentwerte)
                 for (Map.Entry<String, Double> entry : sortedPercentages) {
                     String statText = String.format("%.2f%% %s", entry.getValue(), entry.getKey());
-                    context.getMatrices().push();
-                    context.getMatrices().scale(fontSize / 12.0f, fontSize / 12.0f, 1.0f);
-                    context.drawText(client.textRenderer, statText, (int) ((xLeft + 8) / (fontSize / 12.0)), (int) (yOffsetLeft / (fontSize / 12.0)), 0xFFFFFF, false);
-                    context.getMatrices().pop();
-                    yOffsetLeft += fontSize + 3; // Dynamischer Zeilenabstand
+
+                    // Schriftgröße basierend auf vertikaler Höhe
+                    while ((totalLinesPercent * (fontSizePercent + 3)) > availableHeight && fontSizePercent > minFontSize) {
+                        fontSizePercent--;
+                    }
+
+                    // Schriftgröße basierend auf horizontaler Breite
+                    while (client.textRenderer.getWidth(statText) * (fontSizePercent / 12.0f) > maxOverlayTextWidth && fontSizePercent > minFontSize) {
+                        fontSizePercent--;
+                    }
                 }
 
-                // Rechtes Overlay: Absolute Werte
-                int yOffsetRight = yOverlay + 22; // 22 Pixel Abstand zur Overlay-Oberkante
+
+                int fontSizeAbsolute = maxFontSize;
+                int totalLinesAbsolute = sortedAbsolutes.size();
+
+                // Berechnung für rechtes Overlay (Absolutwerte)
                 for (Map.Entry<String, Double> entry : sortedAbsolutes) {
                     String statText = String.format("+%.0f %s", entry.getValue(), entry.getKey());
-                    context.getMatrices().push();
-                    context.getMatrices().scale(fontSize / 12.0f, fontSize / 12.0f, 1.0f);
-                    context.drawText(client.textRenderer, statText, (int) ((xRight + 8) / (fontSize / 12.0)), (int) (yOffsetRight / (fontSize / 12.0)), 0xFFFFFF, false);
-                    context.getMatrices().pop();
-                    yOffsetRight += fontSize + 3; // Dynamischer Zeilenabstand
+
+                    // Schriftgröße basierend auf vertikaler Höhe
+                    while ((totalLinesAbsolute * (fontSizeAbsolute + 3)) > availableHeight && fontSizeAbsolute > minFontSize) {
+                        fontSizeAbsolute--;
+                    }
+
+                    // Schriftgröße basierend auf horizontaler Breite
+                    while (client.textRenderer.getWidth(statText) * (fontSizeAbsolute / 12.0f) > maxOverlayTextWidth && fontSizeAbsolute > minFontSize) {
+                        fontSizeAbsolute--;
+                    }
                 }
+
+
+
+
+                // Linkes Overlay: Prozentwerte
+                int yOffsetLeft = yOverlay + 22;
+                for (Map.Entry<String, Double> entry : sortedPercentages) {
+                    String statText = String.format("%.2f%% %s", entry.getValue(), entry.getKey());
+
+                    // Zeichne den Text
+                    context.getMatrices().push();
+                    context.getMatrices().scale(fontSizePercent / 12.0f, fontSizePercent / 12.0f, 1.0f);
+                    context.drawText(client.textRenderer, statText, (int) ((xLeft + overlayPadding) / (fontSizePercent / 12.0)), (int) (yOffsetLeft / (fontSizePercent / 12.0)), 0xFFFFFF, false);
+                    context.getMatrices().pop();
+
+                    // Erhöhe die vertikale Position basierend auf der aktuellen Schriftgröße
+                    yOffsetLeft += fontSizePercent + 3;
+
+                    // Abbrechen, falls der Text über das Overlay hinausgeht
+                    if (yOffsetLeft > (yOverlay + overlayHeight)) {
+                        break;
+                    }
+                }
+
+
+
+                // Rechtes Overlay: Absolute Werte
+                int yOffsetRight = yOverlay + 22;
+                for (Map.Entry<String, Double> entry : sortedAbsolutes) {
+                    String statText = String.format("+%.0f %s", entry.getValue(), entry.getKey());
+
+                    // Zeichne den Text
+                    context.getMatrices().push();
+                    context.getMatrices().scale(fontSizeAbsolute / 12.0f, fontSizeAbsolute / 12.0f, 1.0f);
+                    context.drawText(client.textRenderer, statText, (int) ((xRight + overlayPadding) / (fontSizeAbsolute / 12.0)), (int) (yOffsetRight / (fontSizeAbsolute / 12.0)), 0xFFFFFF, false);
+                    context.getMatrices().pop();
+
+                    // Erhöhe die vertikale Position basierend auf der aktuellen Schriftgröße
+                    yOffsetRight += fontSizeAbsolute + 3;
+
+                    // Abbrechen, falls der Text über das Overlay hinausgeht
+                    if (yOffsetRight > (yOverlay + overlayHeight)) {
+                        break;
+                    }
+                }
+
+
+
+
 
                 // Einzelner Rüstungswert anzeigen
                 String armorText = String.format("Rüstung: %.2f", totalArmor);
