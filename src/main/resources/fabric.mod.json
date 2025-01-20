@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "ccstats",
-	"version": "0.0.2",
+	"version": "0.0.4",
 	"name": "CC-Live ArmorStats",
 	"description": "Lass dir Rüstungs Stats im CactusClicker Modus auf PlayLegend anzeigen!",
 	"authors": [
@@ -21,6 +21,9 @@
 		],
 		"client": [
 			"net.firestarter03.ccstats.CCStatsClient"
+		],
+		"modmenu": [
+			"net.firestarter03.ccstats.config.ModMenuIntegration"
 		]
 	},
 	"mixins": [
@@ -30,7 +33,8 @@
 		"fabricloader": ">=0.16.5",
 		"minecraft": "~1.20.1",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"yet_another_config_lib_v3": "*"
 	},
 	"recommends": {
 		"modmenu": "*"

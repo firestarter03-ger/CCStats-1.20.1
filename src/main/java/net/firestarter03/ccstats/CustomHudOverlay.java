@@ -2,6 +2,7 @@ package net.firestarter03.ccstats;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.firestarter03.ccstats.config.CCStatsConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,6 +12,7 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.awt.Color;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,14 +47,16 @@ public class CustomHudOverlay implements HudRenderCallback {
                 // Koordinaten für Overlays
                 int xLeft = (int) (screenWidth * 0.115);  // Links
                 int xRight = (int) (screenWidth * 0.65); // Rechts
-                int yOverlay = (int) (screenHeight * 0.19); // Gleiche Höhe für linkes und rechtes Overlay
+                int yOverlay = (int) (screenHeight * 0.209); // Gleiche Höhe für linkes und rechtes Overlay
                 int overlayWidth = 150;
                 int overlayHeight = 210;
 
                 // Koordinaten für Rüstungswert
-                int xArmor = (screenWidth / 2) - 50; // Zentriert
+                int xArmor = (screenWidth / 2) - 1; // Zentriert
                 int armorYOffset = (int) (screenHeight * 0.15); // Höhe für Rüstungswert
-                int armorTextColor = 0x00e5ff; // Cyan Text für Rüstung
+
+                // Zugriff auf die Textfarbe
+                Color textColor = CCStatsConfig.CONFIG.instance().textColor; // Zugriff auf die textColor durch getConfig()
 
                 // Bilder für Overlays
                 context.drawTexture(IMAGE_LEFT, xLeft, yOverlay, 0, 0, overlayWidth, overlayHeight, overlayWidth, overlayHeight);
@@ -104,7 +108,6 @@ public class CustomHudOverlay implements HudRenderCallback {
                 int overlayPadding = 9; //Abstand vom Rand des Overlays
                 int maxOverlayTextWidth = overlayWidth - (2 * overlayPadding); // Maximale Breite des Textes im Overlay
 
-
                 // Sortierte Listen für die Anzeige
                 List<Map.Entry<String, Double>> sortedPercentages = new ArrayList<>(percentages.entrySet());
                 sortedPercentages.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
@@ -130,7 +133,6 @@ public class CustomHudOverlay implements HudRenderCallback {
                     }
                 }
 
-
                 int fontSizeAbsolute = maxFontSize;
                 int totalLinesAbsolute = sortedAbsolutes.size();
 
@@ -149,61 +151,52 @@ public class CustomHudOverlay implements HudRenderCallback {
                     }
                 }
 
-
-
-
                 // Linkes Overlay: Prozentwerte
                 int yOffsetLeft = yOverlay + 22;
+                int maxPercentageLines = CCStatsConfig.CONFIG.instance().maxPercentageLines; // Hole die Einstellung
+                int lineCount = 0;
+
                 for (Map.Entry<String, Double> entry : sortedPercentages) {
+                    if (maxPercentageLines > 0 && lineCount >= maxPercentageLines) break; // Beende die Schleife, wenn das Limit erreicht ist
+
                     String statText = String.format("%.2f%% %s", entry.getValue(), entry.getKey());
+
 
                     // Zeichne den Text
                     context.getMatrices().push();
                     context.getMatrices().scale(fontSizePercent / 12.0f, fontSizePercent / 12.0f, 1.0f);
-                    context.drawText(client.textRenderer, statText, (int) ((xLeft + overlayPadding) / (fontSizePercent / 12.0)), (int) (yOffsetLeft / (fontSizePercent / 12.0)), 0xFFFFFF, false);
+                    context.drawText(client.textRenderer, statText, (int) ((xLeft + overlayPadding) / (fontSizePercent / 12.0)), (int) (yOffsetLeft / (fontSizePercent / 12.0f)), textColor.getRGB(), false);
                     context.getMatrices().pop();
 
-                    // Erhöhe die vertikale Position basierend auf der aktuellen Schriftgröße
-                    yOffsetLeft += fontSizePercent + 3;
-
-                    // Abbrechen, falls der Text über das Overlay hinausgeht
-                    if (yOffsetLeft > (yOverlay + overlayHeight)) {
-                        break;
-                    }
+                    yOffsetLeft += fontSizePercent + 3; // Vertikalen Versatz berechnen
+                    lineCount++; // Anzahl der gezeichneten Zeilen erhöhen
                 }
-
 
 
                 // Rechtes Overlay: Absolute Werte
                 int yOffsetRight = yOverlay + 22;
+                int maxAbsoluteLines = CCStatsConfig.CONFIG.instance().maxAbsoluteLines; // Hole die Einstellung
+                lineCount = 0;
+
                 for (Map.Entry<String, Double> entry : sortedAbsolutes) {
+                    if (maxAbsoluteLines > 0 && lineCount >= maxAbsoluteLines) break; // Beende die Schleife, wenn das Limit erreicht ist
+
                     String statText = String.format("+%.0f %s", entry.getValue(), entry.getKey());
 
                     // Zeichne den Text
                     context.getMatrices().push();
                     context.getMatrices().scale(fontSizeAbsolute / 12.0f, fontSizeAbsolute / 12.0f, 1.0f);
-                    context.drawText(client.textRenderer, statText, (int) ((xRight + overlayPadding) / (fontSizeAbsolute / 12.0)), (int) (yOffsetRight / (fontSizeAbsolute / 12.0)), 0xFFFFFF, false);
+                    context.drawText(client.textRenderer, statText, (int) ((xRight + overlayPadding) / (fontSizeAbsolute / 12.0)), (int) (yOffsetRight / (fontSizeAbsolute / 12.0f)), textColor.getRGB(), false);
                     context.getMatrices().pop();
 
-                    // Erhöhe die vertikale Position basierend auf der aktuellen Schriftgröße
-                    yOffsetRight += fontSizeAbsolute + 3;
-
-                    // Abbrechen, falls der Text über das Overlay hinausgeht
-                    if (yOffsetRight > (yOverlay + overlayHeight)) {
-                        break;
-                    }
+                    yOffsetRight += fontSizeAbsolute + 3; // Vertikalen Versatz berechnen
+                    lineCount++; // Anzahl der gezeichneten Zeilen erhöhen
                 }
 
 
-
-
-
                 // Einzelner Rüstungswert anzeigen
-                String armorText = String.format("Rüstung: %.2f", totalArmor);
-                context.drawText(client.textRenderer, armorText, xArmor, armorYOffset, armorTextColor, false);
-
-                RenderSystem.disableBlend();
-                RenderSystem.enableDepthTest();
+                String armorText = String.format("%.2f", totalArmor);
+                context.drawText(client.textRenderer, armorText, xArmor, armorYOffset, textColor.getRGB(), false);
             }
         }
     }
